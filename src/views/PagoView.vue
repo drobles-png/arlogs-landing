@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import StepShell from '@/components/StepShell.vue'
 import { useContactStore } from '@/stores/contact'
 import { sendCapiEvent } from '@/utils/capi'
 import { buildNota, fbq, generateEventId, trackStage } from '@/utils/ghl'
+import { loadPayphone, type PayphoneOrder } from '@/utils/payphone'
 import {
   MASTERCLASS_NAME,
   MASTERCLASS_PRICE,
-  PAYMENT_URL,
   SOCIAL,
   masterclassDateLabel,
   whatsappLink,
@@ -18,25 +18,59 @@ const router = useRouter()
 const { contact } = useContactStore()
 const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname)
 
-// Prellena la pasarela con los datos del registro cuando acepta parámetros
-const payHref = computed(() => {
-  if (!PAYMENT_URL) return ''
-  const url = new URL(PAYMENT_URL)
-  if (contact.email) url.searchParams.set('email', contact.email)
-  if (contact.nombre) url.searchParams.set('name', `${contact.nombre} ${contact.apellido}`.trim())
-  if (contact.telefono) url.searchParams.set('phone', contact.telefono)
-  return url.toString()
-})
+// Cajita de Payphone: 'loading' → 'ready' | 'off' (sin credenciales: plan B) | 'error' | 'expired'
+const payState = ref<'loading' | 'ready' | 'off' | 'error' | 'expired'>('loading')
+let expiryTimer: ReturnType<typeof setTimeout> | undefined
+// El formulario de Payphone vence a los 10 min: pasado eso se pide un intento nuevo
+const PAYPHONE_TTL_MS = 9.5 * 60 * 1000
 
 const waHref = whatsappLink(
   `Hola Ángel, soy ${contact.nombre} ${contact.apellido}. Me registré en la masterclass de importación y quiero pagar mis $${MASTERCLASS_PRICE}.`,
 )
+
+async function mountPayphone() {
+  payState.value = 'loading'
+  clearTimeout(expiryTimer)
+  try {
+    const res = await fetch('/api/payphone-order', { method: 'POST' })
+    if (!res.ok) throw new Error(String(res.status))
+    const order = (await res.json()) as PayphoneOrder
+    if (!order.enabled) {
+      payState.value = 'off'
+      return
+    }
+    const PPaymentButtonBox = await loadPayphone()
+    payState.value = 'ready'
+    await nextTick()
+    new PPaymentButtonBox({
+      token: order.token,
+      clientTransactionId: order.clientTransactionId,
+      amount: order.amount,
+      amountWithoutTax: order.amountWithoutTax,
+      currency: order.currency,
+      storeId: order.storeId,
+      reference: order.reference,
+      lang: 'es',
+      defaultMethod: 'card',
+      timeZone: -5,
+      // Datos reales del comprador (Payphone rechaza datos fijos)
+      email: contact.email || undefined,
+      phoneNumber: contact.telefono || undefined,
+    }).render('pp-button')
+    expiryTimer = setTimeout(() => (payState.value = 'expired'), PAYPHONE_TTL_MS)
+  } catch {
+    // En local no hay /api (salvo con `pnpm dev:api`): se ve el plan B
+    payState.value = isLocal ? 'off' : 'error'
+  }
+}
 
 onMounted(() => {
   if (!contact.email && !isLocal) {
     router.replace('/')
     return
   }
+  mountPayphone()
+
   const eventId = generateEventId('checkout')
   const custom = { content_name: MASTERCLASS_NAME, value: MASTERCLASS_PRICE, currency: 'USD' }
   fbq('track', 'InitiateCheckout', custom, { eventID: eventId })
@@ -53,7 +87,7 @@ onMounted(() => {
   )
   const nota = buildNota('PAGO INICIADO', contact, {
     Total: `$${MASTERCLASS_PRICE} USD`,
-    Pasarela: PAYMENT_URL ? 'Enlace de pago' : 'Sin enlace: se le envía por WhatsApp/correo',
+    Pasarela: 'Payphone (Cajita de pagos)',
   }, eventId)
   trackStage('pago-iniciado', {
     nombre: contact.nombre,
@@ -97,21 +131,41 @@ onMounted(() => {
         </div>
       </div>
 
-      <a v-if="payHref" :href="payHref" class="btn btn--primary btn--block pago__btn">
-        <i class="fa-solid fa-lock"></i> Pagar ${{ MASTERCLASS_PRICE }} de forma segura
-      </a>
-      <template v-else>
-        <div class="notice">
+      <!-- Cajita de Payphone: el formulario lo pinta Payphone dentro de #pp-button -->
+      <div v-if="payState === 'loading'" class="paybox paybox--loading" role="status">
+        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando el pago seguro…
+      </div>
+      <div v-show="payState === 'ready'" class="paybox">
+        <p class="paybox__secure"><i class="fa-solid fa-lock" aria-hidden="true"></i> Pago seguro con Payphone</p>
+        <div id="pp-button"></div>
+      </div>
+      <div v-if="payState === 'expired' || payState === 'error'" class="notice">
+        <i class="fa-solid fa-circle-info"></i>
+        <p v-if="payState === 'expired'">El formulario de pago venció por seguridad. Ábrelo de nuevo para pagar.</p>
+        <p v-else>No pudimos cargar el pago. Inténtalo de nuevo o escríbenos.</p>
+      </div>
+      <button
+        v-if="payState === 'expired' || payState === 'error'"
+        type="button"
+        class="btn btn--primary btn--block pago__btn"
+        @click="mountPayphone"
+      >
+        <i class="fa-solid fa-rotate-right"></i> Volver a cargar el pago
+      </button>
+
+      <!-- Plan B: Payphone sin configurar, o error al cargar -->
+      <template v-if="payState === 'off' || payState === 'error'">
+        <div v-if="payState === 'off'" class="notice">
           <i class="fa-solid fa-circle-info"></i>
           <p>
             Recibimos tus datos. Te enviaremos el enlace de pago a tu WhatsApp
             <strong v-if="contact.telefono">{{ contact.telefono }}</strong> y a tu correo.
           </p>
         </div>
-        <a v-if="waHref" :href="waHref" target="_blank" rel="noopener" class="btn btn--primary btn--block">
+        <a v-if="waHref" :href="waHref" target="_blank" rel="noopener" class="btn btn--ghost btn--block">
           <i class="fa-brands fa-whatsapp"></i> Pagar por WhatsApp
         </a>
-        <!-- Sin enlace de pago ni WhatsApp: al menos un canal directo para no dejar un callejón -->
+        <!-- Sin WhatsApp: al menos un canal directo para no dejar un callejón -->
         <a v-else :href="SOCIAL.instagram" target="_blank" rel="noopener" class="btn btn--ghost btn--block">
           <i class="fa-brands fa-instagram"></i> Escríbenos por Instagram
         </a>
@@ -231,6 +285,37 @@ onMounted(() => {
       font-size: 1.6rem;
       font-weight: 500;
       color: $AR-ORANGE-SOFT;
+    }
+  }
+}
+
+.paybox {
+  text-align: left;
+  border-radius: 16px;
+  background: $white;
+  color: #1a1a1a;
+  padding: 1rem;
+
+  &--loading {
+    text-align: center;
+    background: $AR-NAVY-800;
+    border: 1px solid $AR-NAVY-600;
+    color: $AR-TEXT-MUTED;
+    padding: 1.5rem 1rem;
+
+    i {
+      margin-right: 0.4rem;
+    }
+  }
+
+  &__secure {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2b3a55;
+
+    i {
+      margin-right: 0.35rem;
     }
   }
 }

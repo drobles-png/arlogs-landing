@@ -196,7 +196,8 @@ const handleSubmit = async () => {
     }),
   ])
 
-  const custom = { content_name: MASTERCLASS_NAME, value: MASTERCLASS_PRICE, currency: 'USD' }
+  // Sin value: la campaña optimiza por Purchase y el Lead no debe sumarse como ingreso
+  const custom = { content_name: MASTERCLASS_NAME }
   fbq('track', 'Lead', custom, { eventID: eventId })
   sendCapiEvent(
     'Lead',

@@ -29,20 +29,27 @@ pnpm format
 ```
 /  (FunnelView, alias /masterclass)   VSL Wistia + CTA "Inscribirme por $10"
   ↓ RegistrationModal (nombre, apellido, correo, WhatsApp, situación) → Lead
-/pago (PagoView)                       resumen + botón a PAYMENT_URL → InitiateCheckout
-  ↓ la pasarela redirige al terminar
-/inscripcion-confirmada (ConfirmadaView) → Purchase ($10, una sola vez por dispositivo)
+/pago (PagoView)                       resumen + Cajita de Payphone → InitiateCheckout
+  ↓ Payphone redirige a /inscripcion-confirmada?id=…&clientTransactionId=…
+/inscripcion-confirmada (ConfirmadaView) → confirma en /api/payphone-confirm → Purchase solo si statusCode 3 y $10
   ↓ opcional: calendario GHL "veamos tu caso juntos" (BookingCalendar) → Schedule
 /politicas-privacidad · /aviso-legal
 ```
 - `/pago` sin contacto guardado vuelve a `/` (salvo en localhost).
-- Si `PAYMENT_URL` está vacío, `/pago` dice que el enlace llega por WhatsApp/correo y, si hay
-  `WHATSAPP_NUMBER`, muestra el botón "Pagar por WhatsApp".
-- Purchase se dispara al entrar a `/inscripcion-confirmada`, sin verificar el pago en servidor:
-  esa URL solo debe conocerla la pasarela.
+- Payphone: `api/payphone-order.ts` (fija el monto, 1000 centavos, y entrega token/storeId) y
+  `api/payphone-confirm.ts` (confirma con Payphone; hay 5 min o reversa el cobro). Env vars en Vercel:
+  `PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`. Sin ellas `/pago` muestra el plan B (WhatsApp/Instagram).
+  En Payphone Developer (app WEB): dominio exacto + URL de respuesta `https://<dominio>/inscripcion-confirmada`.
+  `vercel.json` manda `Referrer-Policy: origin-when-cross-origin` (lo exige la Cajita).
+- Purchase: event_id `purchase_<transactionId>` (Meta deduplica aunque recargue) y `order_id`.
+  Sin parámetros o pago no aprobado: no hay Purchase. En local, `?demo=1` muestra el éxito sin eventos.
+- Lead va sin `value`: la campaña optimiza por **Purchase**.
+- En localhost no se envía nada a GHL (consola `[GHL stub]`) salvo con `?ghl=1`; el Pixel y CAPI tampoco cargan.
+- `api/capi.ts` rechaza otros dominios (403) y eventos fuera de la lista (400).
 
 ## Configuración (todo en un lugar)
-- `src/config/masterclass.ts`: `MASTERCLASS_DATE` (ISO con -05:00), precio, `PAYMENT_URL`,
+- `src/config/masterclass.ts`: `MASTERCLASS_DAY` (`2026-12-03`), `MASTERCLASS_TIME` (HH:MM, vacío =
+  "hora por confirmar"), precio (si cambia, también `AMOUNT_CENTS` en `api/payphone-*.ts`),
   `WISTIA_MEDIA_ID` (`hnck8wn24b`), `WHATSAPP_NUMBER`, redes, datos legales.
 - `src/utils/ghl.ts`: `GHL_CONTACT_WEBHOOK`, `GHL_QUALIFICATION_WEBHOOK`, `GHL_BOOKING_CALENDAR`
   (vacíos = no se envía nada) y `buildNota()` (nota de texto para el CRM, va en `nota` y `notas`).
@@ -65,7 +72,7 @@ El calendario carga `form_embed.js` de GHL al abrirse (ajusta el alto del iframe
 | Clave | Contenido |
 |---|---|
 | `ar_contact` | `{ nombre, apellido, email, telefono, situacion, timestamp }` |
-| `ar_purchase_at` | timestamp del Purchase ya enviado |
+| `ar_purchase_at_<transactionId>` | timestamp del Purchase ya enviado para esa transacción |
 | `ar_booked_at` | timestamp de la reunión agendada |
 | `ar_fb` (sessionStorage) | fbclid, fbc, fbp, utm_* |
 
@@ -88,5 +95,5 @@ lo que emite CSS va en `global.scss`).
   (solo los 3 paneles). Original en `brand/logo-original.png`; también `public/image.png` (favicon/og).
 
 ## Pendientes
-Fecha de la clase · enlace de pago · WhatsApp · mapear campos y publicar los workflows en GHL · razón social/RUC/correo legal ·
-foto de Ángel · dominio.
+Hora de la clase · credenciales de Payphone (token + storeId) y registrar dominio/URL de respuesta · mapear campos y publicar los workflows en GHL · razón social/RUC/correo legal ·
+foto de Ángel · dominio (al tenerlo, cambiar `og:image` en index.html).

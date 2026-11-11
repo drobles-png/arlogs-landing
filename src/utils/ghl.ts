@@ -13,8 +13,18 @@ export function generateEventId(prefix = 'evt'): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}`
 }
 
+// En localhost no se envía nada al CRM de Arlog (solo se muestra en consola),
+// salvo que se abra con ?ghl=1 para probar los workflows a propósito.
+const LOCAL_STUB =
+  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
+  !new URLSearchParams(window.location.search).has('ghl')
+
 export async function postToGhl(url: string, body: Record<string, unknown>) {
   if (!url) return
+  if (LOCAL_STUB) {
+    console.info('[GHL stub]', url.split('/').pop(), body)
+    return
+  }
   await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
