@@ -94,6 +94,15 @@ lo que emite CSS va en `global.scss`).
 - Logos: `src/assets/logos/arlog-logo.webp` (completo, fondo transparente) y `arlog-mark.webp`
   (solo los 3 paneles). Original en `brand/logo-original.png`; también `public/image.png` (favicon/og).
 
+## GHL (subcuenta `arlogs`, locationId `TvW9G67TrCg2VD5ZORoO`)
+Pipeline propio **Master Arlogs** (no el general de Bakano): `registro` → Registrado ·
+`pago-iniciado` → Pago iniciado · `pagado` → Inscrito · `reunion-agendada` → Reunion Agendada.
+Workflows: `OBTENER CONTACTO funnel tr` (ramas por etapa, cada una con su oportunidad) y
+`obtener cualificacion | funnel` (ramas `califica` true/false **sin** acción de oportunidad: si la
+tuviera, mandaría a Inscrito/Perdidos antes de pagar). Verificado el 12/11/2026 con el MCP de
+HighLevel: un contacto y una oportunidad por persona, terminando en Pago iniciado. La Workflows API
+no está habilitada en esta subcuenta (no se pueden leer ni crear workflows por API).
+
 ## Pendientes
 Hora de la clase · credenciales de Payphone (token + storeId) y registrar dominio/URL de respuesta · mapear campos y publicar los workflows en GHL · razón social/RUC/correo legal ·
 foto de Ángel · dominio (al tenerlo, cambiar `og:image` en index.html).
