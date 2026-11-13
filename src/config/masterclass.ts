@@ -3,13 +3,13 @@
 // Fecha de la clase (AAAA-MM-DD) y hora de inicio en Ecuador (HH:MM, 24 h).
 // Sin hora se muestra "hora por confirmar". Sin fecha, "Fecha por confirmar".
 export const MASTERCLASS_DAY = '2026-12-03'
-export const MASTERCLASS_TIME = ''
+export const MASTERCLASS_TIME = '20:00'
 
 // ISO completo con -05:00 (vacío si falta la hora): lo usa el botón "Agregar a Google Calendar"
 export const MASTERCLASS_DATE =
   MASTERCLASS_DAY && MASTERCLASS_TIME ? `${MASTERCLASS_DAY}T${MASTERCLASS_TIME}:00-05:00` : ''
 
-export const MASTERCLASS_PRICE = 10
+export const MASTERCLASS_PRICE = 20
 export const MASTERCLASS_CURRENCY = 'USD'
 export const MASTERCLASS_NAME = 'Masterclass: Importa tu tecnología desde China'
 

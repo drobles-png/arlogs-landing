@@ -4,7 +4,7 @@
 Landing / funnel de **Arlog (Arlogs Ecuador)**, empresa de importaciones (aéreo, marítimo, terrestre).
 Instagram: https://www.instagram.com/arlogsecuador/ · Facebook: https://www.facebook.com/Arlogsecuador/
 
-Vende una **masterclass en vivo de $10** dictada por **Ángel, de Arlog**, para quien vende (o quiere
+Vende una **masterclass en vivo de $20** dictada por **Ángel, de Arlog**, para quien vende (o quiere
 vender) computadoras, impresoras y accesorios y hoy le compra a un importador intermediario.
 Se armó a partir de la plantilla de funnel VSL de Bakano y se rebrandeó por completo:
 no debe quedar ninguna mención a Bakano ni a otro cliente.
@@ -27,16 +27,16 @@ pnpm format
 
 ## Flujo
 ```
-/  (FunnelView, alias /masterclass)   VSL Wistia + CTA "Inscribirme por $10"
+/  (FunnelView, alias /masterclass)   VSL Wistia + CTA "Inscribirme por $20"
   ↓ RegistrationModal (nombre, apellido, correo, WhatsApp, situación) → Lead
 /pago (PagoView)                       resumen + Cajita de Payphone → InitiateCheckout
   ↓ Payphone redirige a /inscripcion-confirmada?id=…&clientTransactionId=…
-/inscripcion-confirmada (ConfirmadaView) → confirma en /api/payphone-confirm → Purchase solo si statusCode 3 y $10
+/inscripcion-confirmada (ConfirmadaView) → confirma en /api/payphone-confirm → Purchase solo si statusCode 3 y $20
   ↓ opcional: calendario GHL "veamos tu caso juntos" (BookingCalendar) → Schedule
 /politicas-privacidad · /aviso-legal
 ```
 - `/pago` sin contacto guardado vuelve a `/` (salvo en localhost).
-- Payphone: `api/payphone-order.ts` (fija el monto, 1000 centavos, y entrega token/storeId) y
+- Payphone: `api/payphone-order.ts` (fija el monto, 2000 centavos, y entrega token/storeId) y
   `api/payphone-confirm.ts` (confirma con Payphone; hay 5 min o reversa el cobro). Env vars en Vercel:
   `PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`. Sin ellas `/pago` muestra el plan B (WhatsApp/Instagram).
   En Payphone Developer (app WEB): dominio exacto + URL de respuesta `https://<dominio>/inscripcion-confirmada`.
@@ -48,7 +48,7 @@ pnpm format
 - `api/capi.ts` rechaza otros dominios (403) y eventos fuera de la lista (400).
 
 ## Configuración (todo en un lugar)
-- `src/config/masterclass.ts`: `MASTERCLASS_DAY` (`2026-12-03`), `MASTERCLASS_TIME` (HH:MM, vacío =
+- `src/config/masterclass.ts`: `MASTERCLASS_DAY` (`2026-12-03`), `MASTERCLASS_TIME` (`20:00`; HH:MM, vacío =
   "hora por confirmar"), precio (si cambia, también `AMOUNT_CENTS` en `api/payphone-*.ts`),
   `WISTIA_MEDIA_ID` (`hnck8wn24b`), `WHATSAPP_NUMBER`, redes, datos legales.
 - `src/utils/ghl.ts`: `GHL_CONTACT_WEBHOOK`, `GHL_QUALIFICATION_WEBHOOK`, `GHL_BOOKING_CALENDAR`
@@ -84,7 +84,7 @@ El calendario carga `form_embed.js` de GHL al abrirse (ajusta el alto del iframe
   cálculo de IA.
 - 3 pasos: 1) encontrar/verificar proveedor y pagarle seguro 2) traer la mercadería y quién hace cada
   parte 3) costo real por unidad puesta en bodega.
-- Por qué $10: "quiero que se conecten personas que de verdad están pensando en importar".
+- Por qué se cobra: "quiero que se conecten personas que de verdad están pensando en importar".
 - Cierre: si prefieres que veamos tu caso juntos, me escribes y agendamos una reunión.
 
 ## Marca

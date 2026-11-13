@@ -1,14 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { randomBytes } from 'crypto'
 
-// Crea un intento de pago para la Cajita de Payphone (masterclass de $10).
+// Crea un intento de pago para la Cajita de Payphone (masterclass de $20).
 // El monto lo fija el servidor: el navegador no puede cambiar lo que se cobra.
 // PAYPHONE_TOKEN y PAYPHONE_STORE_ID viven solo en env vars de Vercel. Si faltan,
 // responde { enabled: false } y /pago muestra el plan B (WhatsApp / Instagram).
 // El token de la Cajita termina en el navegador por diseño de Payphone; se entrega desde aquí
 // para poder rotarlo sin redeploy del frontend.
 
-const AMOUNT_CENTS = 1000 // $10.00 — debe coincidir con MASTERCLASS_PRICE y con payphone-confirm.ts
+const AMOUNT_CENTS = 2000 // $20.00 — debe coincidir con MASTERCLASS_PRICE y con payphone-confirm.ts
 const REFERENCE = 'Masterclass de importación Arlog'
 
 function hostOf(value: string | undefined): string | undefined {

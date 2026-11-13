@@ -26,7 +26,7 @@ const router = createRouter({
       meta: {
         title: 'Masterclass de importación en vivo | Arlog',
         description:
-          'Aprende a importar computadoras, impresoras y accesorios por tu cuenta: proveedor, traslado y aduana, y el costo real de cada unidad puesta en tu bodega. En vivo, $10.',
+          'Aprende a importar computadoras, impresoras y accesorios por tu cuenta: proveedor, traslado y aduana, y el costo real de cada unidad puesta en tu bodega. En vivo, $20.',
       } satisfies RouteMeta,
     },
     {
@@ -35,7 +35,7 @@ const router = createRouter({
       component: () => import('../views/PagoView.vue'),
       meta: {
         title: 'Confirma tu lugar | Masterclass Arlog',
-        description: 'Completa el pago de $10 para confirmar tu lugar en la masterclass de importación.',
+        description: 'Completa el pago de $20 para confirmar tu lugar en la masterclass de importación.',
         noindex: true,
       } satisfies RouteMeta,
     },

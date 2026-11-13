@@ -267,14 +267,14 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- Por qué $10 + cierre -->
+    <!-- Por qué se cobra + cierre -->
     <section class="section section--close">
       <div class="container">
         <div ref="offer" class="offer reveal">
           <div class="offer__stripes" aria-hidden="true"><span></span><span></span><span></span></div>
           <p class="eyebrow">Por qué cuesta ${{ MASTERCLASS_PRICE }}</p>
           <blockquote>
-            “Cobro esos diez dólares a propósito, porque quiero que se conecten personas que de
+            “Cobro la entrada a propósito, porque quiero que se conecten personas que de
             verdad están pensando en importar.”
           </blockquote>
           <dl class="offer__facts">

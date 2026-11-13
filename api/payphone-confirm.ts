@@ -5,7 +5,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 // Confirmar es idempotente del lado de Payphone (recargar la página devuelve el mismo estado).
 // Solo con statusCode 3 (Approved) y el monto correcto la página dispara Purchase.
 
-const AMOUNT_CENTS = 1000 // debe coincidir con payphone-order.ts
+const AMOUNT_CENTS = 2000 // debe coincidir con payphone-order.ts
 const CONFIRM_URL = 'https://paymentbox.payphonetodoesposible.com/api/confirm'
 
 function hostOf(value: string | undefined): string | undefined {
