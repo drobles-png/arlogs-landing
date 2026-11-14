@@ -23,6 +23,61 @@ function isSameOrigin(req: VercelRequest): boolean {
   return Boolean(host && origin && origin === host)
 }
 
+// Agenda la clase en el calendario de GHL solo con pago aprobado (lo verifica este servidor).
+// Sin GHL_API_TOKEN (Private Integration de la subcuenta) no hace nada. Recargar no duplica la cita.
+const GHL_API = 'https://services.leadconnectorhq.com'
+const GHL_LOCATION_ID = 'TvW9G67TrCg2VD5ZORoO'
+const GHL_CLASS_CALENDAR_ID = 'hwH6JrfPWbsy2UXGUzGa' // calendario de clase "Masterclass Arlog"
+const CLASS_START = '2026-12-03T20:00:00-05:00' // = MASTERCLASS_DAY + MASTERCLASS_TIME
+const CLASS_END = '2026-12-03T21:30:00-05:00'
+
+interface Attendee {
+  email: string
+  phone: string
+  firstName: string
+  lastName: string
+}
+
+async function bookClass(a: Attendee): Promise<boolean> {
+  const token = process.env.GHL_API_TOKEN
+  const calendarId = GHL_CLASS_CALENDAR_ID
+  if (!token || (!a.email && !a.phone)) return false
+  const ghl = (path: string, version: string, init?: RequestInit) =>
+    fetch(`${GHL_API}${path}`, {
+      ...init,
+      headers: { Authorization: `Bearer ${token}`, Version: version, 'Content-Type': 'application/json' },
+    })
+
+  const up = await ghl('/contacts/upsert', '2021-07-28', {
+    method: 'POST',
+    body: JSON.stringify({ locationId: GHL_LOCATION_ID, ...a }),
+  })
+  const contactId = ((await up.json()) as { contact?: { id?: string } }).contact?.id
+  if (!contactId) {
+    console.error('[ghl] upsert', up.status)
+    return false
+  }
+
+  const prev = await ghl(`/contacts/${contactId}/appointments`, '2021-07-28')
+  const events = ((await prev.json()) as { events?: { calendarId?: string }[] }).events ?? []
+  if (events.some((e) => e.calendarId === calendarId)) return true
+
+  const appt = await ghl('/calendars/events/appointments', '2021-04-15', {
+    method: 'POST',
+    body: JSON.stringify({
+      calendarId,
+      locationId: GHL_LOCATION_ID,
+      contactId,
+      startTime: CLASS_START,
+      endTime: CLASS_END,
+      appointmentStatus: 'confirmed',
+      toNotify: true,
+    }),
+  })
+  if (!appt.ok) console.error('[ghl] appointment', appt.status, await appt.text())
+  return appt.ok
+}
+
 interface PayphoneConfirm {
   statusCode?: number
   transactionStatus?: string
@@ -52,7 +107,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
-  const { id, clientTransactionId } = (req.body ?? {}) as { id?: unknown; clientTransactionId?: unknown }
+  const { id, clientTransactionId, contact } = (req.body ?? {}) as {
+    id?: unknown
+    clientTransactionId?: unknown
+    contact?: Partial<Record<'nombre' | 'apellido' | 'email' | 'telefono', unknown>>
+  }
   const numericId = Number(id)
   if (!Number.isInteger(numericId) || numericId <= 0 || typeof clientTransactionId !== 'string' || !clientTransactionId) {
     res.status(400).json({ approved: false, error: 'id y clientTransactionId son requeridos' })
@@ -68,9 +127,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const data = (await ppRes.json()) as PayphoneConfirm
     const approved = ppRes.ok && data.statusCode === 3 && data.amount === AMOUNT_CENTS
 
+    const str = (v: unknown) => (typeof v === 'string' ? v.trim().slice(0, 120) : '')
+    let booked = false
+    if (approved) {
+      try {
+        booked = await bookClass({
+          email: str(contact?.email) || data.email || '',
+          phone: str(contact?.telefono) || data.phoneNumber || '',
+          firstName: str(contact?.nombre),
+          lastName: str(contact?.apellido),
+        })
+      } catch (e) {
+        console.error('[ghl] book', e)
+        // El pago ya está confirmado: un fallo de GHL no debe romper la página
+      }
+    }
+
     res.setHeader('Cache-Control', 'no-store')
     res.status(200).json({
       approved,
+      booked,
       status: data.transactionStatus ?? (ppRes.ok ? 'Unknown' : 'Error'),
       statusCode: data.statusCode ?? null,
       transactionId: data.transactionId ?? numericId,

@@ -17,6 +17,7 @@ export interface PayphoneOrder {
 
 export interface PayphoneConfirmation {
   approved: boolean
+  booked?: boolean
   status: string
   statusCode: number | null
   transactionId: number
@@ -57,11 +58,15 @@ export function loadPayphone(): Promise<PPaymentButtonBoxCtor> {
   return loading
 }
 
-export async function confirmPayphone(id: string, clientTransactionId: string): Promise<PayphoneConfirmation> {
+export async function confirmPayphone(
+  id: string,
+  clientTransactionId: string,
+  contact: { nombre: string; apellido: string; email: string; telefono: string },
+): Promise<PayphoneConfirmation> {
   const res = await fetch('/api/payphone-confirm', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, clientTransactionId }),
+    body: JSON.stringify({ id, clientTransactionId, contact }),
   })
   return (await res.json()) as PayphoneConfirmation
 }

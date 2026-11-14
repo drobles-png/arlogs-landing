@@ -112,7 +112,7 @@ onMounted(async () => {
   txId.value = id
   try {
     // Apenas carga: Payphone reversa el cobro si no se confirma en 5 minutos
-    const r = await confirmPayphone(id, clientTx)
+    const r = await confirmPayphone(id, clientTx, contact)
     if (r.approved) {
       state.value = 'approved'
       firePurchase(String(r.transactionId), { email: r.email, phone: r.phone })
