@@ -41,6 +41,9 @@ pnpm format
   `PAYPHONE_TOKEN`, `PAYPHONE_STORE_ID`. Sin ellas `/pago` muestra el plan B (WhatsApp/Instagram).
   En Payphone Developer (app WEB): dominio exacto + URL de respuesta `https://<dominio>/inscripcion-confirmada`.
   `vercel.json` manda `Referrer-Policy: origin-when-cross-origin` (lo exige la Cajita).
+- Con pago aprobado, `api/payphone-confirm.ts` agenda al contacto en el calendario de clase de GHL
+  `hwH6JrfPWbsy2UXGUzGa` (3/12 20:00, Meet fijo). Requiere `GHL_API_TOKEN` (Private Integration) en Vercel;
+  no duplica la cita al recargar. Si cambia la fecha, actualizar `CLASS_START/END` ahí.
 - Purchase: event_id `purchase_<transactionId>` (Meta deduplica aunque recargue) y `order_id`.
   Sin parámetros o pago no aprobado: no hay Purchase. En local, `?demo=1` muestra el éxito sin eventos.
 - Lead va sin `value`: la campaña optimiza por **Purchase**.
