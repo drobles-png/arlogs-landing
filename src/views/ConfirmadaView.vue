@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import StepShell from '@/components/StepShell.vue'
 import { useContactStore } from '@/stores/contact'
 import { sendCapiEvent } from '@/utils/capi'
-import BookingCalendar from '@/components/BookingCalendar.vue'
 import { buildNota, fbq, trackStage } from '@/utils/ghl'
 import { confirmPayphone } from '@/utils/payphone'
 import {
@@ -182,11 +181,8 @@ onMounted(async () => {
       </ol>
 
       <p class="ok__close">
-        Si al final prefieres que veamos tu caso juntos, me escribes y agendamos una reunión.
         Nos vemos en la clase. — Ángel
       </p>
-
-      <BookingCalendar />
 
       <div class="ok__social">
         <a :href="SOCIAL.instagram" target="_blank" rel="noopener" class="btn btn--ghost">

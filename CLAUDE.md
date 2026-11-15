@@ -32,7 +32,6 @@ pnpm format
 /pago (PagoView)                       resumen + Cajita de Payphone → InitiateCheckout
   ↓ Payphone redirige a /inscripcion-confirmada?id=…&clientTransactionId=…
 /inscripcion-confirmada (ConfirmadaView) → confirma en /api/payphone-confirm → Purchase solo si statusCode 3 y $20
-  ↓ opcional: calendario GHL "veamos tu caso juntos" (BookingCalendar) → Schedule
 /politicas-privacidad · /aviso-legal
 ```
 - `/pago` sin contacto guardado vuelve a `/` (salvo en localhost).
@@ -54,7 +53,7 @@ pnpm format
 - `src/config/masterclass.ts`: `MASTERCLASS_DAY` (`2026-12-03`), `MASTERCLASS_TIME` (`20:00`; HH:MM, vacío =
   "hora por confirmar"), precio (si cambia, también `AMOUNT_CENTS` en `api/payphone-*.ts`),
   `WISTIA_MEDIA_ID` (`hnck8wn24b`), `WHATSAPP_NUMBER`, redes, datos legales.
-- `src/utils/ghl.ts`: `GHL_CONTACT_WEBHOOK`, `GHL_QUALIFICATION_WEBHOOK`, `GHL_BOOKING_CALENDAR`
+- `src/utils/ghl.ts`: `GHL_CONTACT_WEBHOOK`, `GHL_QUALIFICATION_WEBHOOK`
   (vacíos = no se envía nada) y `buildNota()` (nota de texto para el CRM, va en `nota` y `notas`).
 - Pixel `2202471354478065` en `index.html`. **No carga en localhost.**
 - CAPI: `META_PIXEL_ID` y `META_CAPI_TOKEN` solo en `.env.local` / env vars de Vercel. Nunca con prefijo `VITE_`.
@@ -66,17 +65,15 @@ pnpm format
 | Envía el formulario | cualificación | `cualificacion` (+ `califica` true/false, `resultado`) | `step-2-cualificacion`, `califica`/`no-califica`, `situacion-*`, `perfil-*` |
 | Entra a /pago | contacto | `pago-iniciado` | `step-3-pago-iniciado` |
 | Entra a /inscripcion-confirmada | contacto | `pagado` | `step-4-pagado`, `masterclass-pagado` |
-| Agenda en el calendario | contacto | `reunion-agendada` | `step-5-reunion-agendada` |
 
-Eventos Meta (Pixel + CAPI, mismo event_id): Lead, InitiateCheckout, Purchase, Schedule.
-El calendario carga `form_embed.js` de GHL al abrirse (ajusta el alto del iframe).
+Eventos Meta (Pixel + CAPI, mismo event_id): Lead, InitiateCheckout, Purchase.
+Sin calendario 1 a 1 en esta landing (se quitó el 14/11/2026): la reunión 1 a 1 irá en otra landing.
 
 ## localStorage
 | Clave | Contenido |
 |---|---|
 | `ar_contact` | `{ nombre, apellido, email, telefono, situacion, timestamp }` |
 | `ar_purchase_at_<transactionId>` | timestamp del Purchase ya enviado para esa transacción |
-| `ar_booked_at` | timestamp de la reunión agendada |
 | `ar_fb` (sessionStorage) | fbclid, fbc, fbp, utm_* |
 
 ## Contenido (del VSL — no inventar más)

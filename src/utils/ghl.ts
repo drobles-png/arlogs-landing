@@ -7,7 +7,6 @@ export const GHL_CONTACT_WEBHOOK =
   'https://services.leadconnectorhq.com/hooks/TvW9G67TrCg2VD5ZORoO/webhook-trigger/8ceuPBZ9n7qaCCdktUzS'
 export const GHL_QUALIFICATION_WEBHOOK =
   'https://services.leadconnectorhq.com/hooks/TvW9G67TrCg2VD5ZORoO/webhook-trigger/0vj9IygAueoO1K23C9Id'
-export const GHL_BOOKING_CALENDAR = 'https://api.leadconnectorhq.com/widget/booking/juIoDHRJl4kJXiC7oWyB'
 
 export function generateEventId(prefix = 'evt'): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}`
