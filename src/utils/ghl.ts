@@ -27,7 +27,8 @@ export async function postToGhl(url: string, body: Record<string, unknown>) {
   await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    // ads-bakano: todo lead que llega de una landing de Bakano (pauta de Bakano) va marcado así en GHL
+    body: JSON.stringify({ ...body, tags: [...((body.tags as string[] | undefined) ?? []), 'ads-bakano'] }),
   })
 }
 
