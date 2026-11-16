@@ -55,7 +55,7 @@ pnpm format
 ## Configuración (todo en un lugar)
 - `src/config/masterclass.ts`: `MASTERCLASS_DAY` (`2026-12-03`), `MASTERCLASS_TIME` (`20:00`; HH:MM, vacío =
   "hora por confirmar"), precio (si cambia, también `AMOUNT_CENTS` en `api/payphone-*.ts`),
-  `WISTIA_MEDIA_ID` (`hnck8wn24b`), `WHATSAPP_NUMBER`, redes, datos legales.
+  `WISTIA_MEDIA_ID` (`k97r2nv7mm`), `WHATSAPP_NUMBER`, redes, datos legales.
 - `src/utils/ghl.ts`: `GHL_CONTACT_WEBHOOK`, `GHL_QUALIFICATION_WEBHOOK`
   (vacíos = no se envía nada) y `buildNota()` (nota de texto para el CRM, va en `nota` y `notas`).
 - Pixel `2202471354478065` en `index.html`. **No carga en localhost.**
@@ -107,4 +107,4 @@ HighLevel: un contacto y una oportunidad por persona, terminando en Pago iniciad
 no está habilitada en esta subcuenta (no se pueden leer ni crear workflows por API).
 
 ## Pendientes
-Razón social/RUC/correo legal · foto de Ángel · re-cortar el video (dice $10) · recordatorios por WhatsApp.
+Razón social/RUC/correo legal · foto de Ángel · recordatorios por WhatsApp.

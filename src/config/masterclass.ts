@@ -19,7 +19,7 @@ export const MASTERCLASS_NAME = 'Masterclass: Importa tu tecnología desde China
 // Si cambia el precio, cambia también AMOUNT_CENTS en los dos archivos de api/.
 
 // VSL de Ángel en Wistia
-export const WISTIA_MEDIA_ID = 'hnck8wn24b'
+export const WISTIA_MEDIA_ID = 'k97r2nv7mm'
 
 // WhatsApp de Arlog en formato internacional sin "+" (ej. 593987654321). Vacío = se oculta.
 export const WHATSAPP_NUMBER = '593958625891'
