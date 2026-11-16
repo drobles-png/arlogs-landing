@@ -4,6 +4,9 @@
 Landing / funnel de **Arlog (Arlogs Ecuador)**, empresa de importaciones (aéreo, marítimo, terrestre).
 Instagram: https://www.instagram.com/arlogsecuador/ · Facebook: https://www.facebook.com/Arlogsecuador/
 
+**Dominio único: https://arlogs-lng.vercel.app** (regla Bakano: `marca-lng.vercel.app`). No hay otros dominios en el
+proyecto de Vercel. Si cambia, actualizar también Payphone Developer (dominio + URL de respuesta) y `og:image`.
+
 Vende una **masterclass en vivo de $20** dictada por **Ángel, de Arlog**, para quien vende (o quiere
 vender) computadoras, impresoras y accesorios y hoy le compra a un importador intermediario.
 Se armó a partir de la plantilla de funnel VSL de Bakano y se rebrandeó por completo:
@@ -104,5 +107,4 @@ HighLevel: un contacto y una oportunidad por persona, terminando en Pago iniciad
 no está habilitada en esta subcuenta (no se pueden leer ni crear workflows por API).
 
 ## Pendientes
-Hora de la clase · credenciales de Payphone (token + storeId) y registrar dominio/URL de respuesta · mapear campos y publicar los workflows en GHL · razón social/RUC/correo legal ·
-foto de Ángel · dominio (al tenerlo, cambiar `og:image` en index.html).
+Razón social/RUC/correo legal · foto de Ángel · re-cortar el video (dice $10) · recordatorios por WhatsApp.
