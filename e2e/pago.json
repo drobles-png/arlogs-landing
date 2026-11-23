@@ -1,0 +1,10 @@
+[
+  {"goto": "/?fbclid=TEST_e2e&utm_source=facebook&utm_medium=paid&utm_campaign=TEST-e2e&utm_content=anuncio-test"},
+  {"click_text": "Inscribirme"},
+  {"fill": {"[data-field=nombre]": "Test Bakano", "[data-field=apellido]": "Prueba Pago", "[data-field=email]": "prueba.pago@bakano-test.com", "[data-field=phone]": "0991112233"}},
+  {"click": "label:has(input[value=ya_vendo])"},
+  {"click": "form [type=submit]"},
+  {"wait_url": "**/pago"},
+  {"wait": 3000},
+  {"shot": "pago"}
+]
