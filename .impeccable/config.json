@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "lato",
+        "createdAt": "2026-11-15T03:44:54.552Z",
+        "reason": "Lato es la tipografía de marca de Arlog (familia del wordmark), definida en docs/brand-guidelines.md"
+      }
+    ]
+  }
+}
